@@ -28,27 +28,36 @@ ls(char *path)
 {
   char buf[512], *p;
   int fd;
-  struct dirent de;
-  struct stat st;
+  struct dirent de;  // This struct is to store the names of the files and directories inside the folder.
 
+  struct stat st;   // this is to store the file/folder information itself.
+
+
+
+  // this part opens the file or the directory and returns the fd.
   if((fd = open(path, O_RDONLY)) < 0){
     fprintf(2, "ls: cannot open %s\n", path);
     return;
   }
 
+
+  // get the directory or file information using fstat since there's fd already.
   if(fstat(fd, &st) < 0){
     fprintf(2, "ls: cannot stat %s\n", path);
     close(fd);
     return;
   }
 
+  // checking if the path is a folder, file or device file.
   switch(st.type){
   case T_DEVICE:
   case T_FILE:
+    // if its a file then we print it's details.
     printf("%s %d %d %l\n", fmtname(path), st.type, st.ino, st.size);
     break;
 
   case T_DIR:
+    // if its directory the handling is different.
     if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
       printf("ls: path too long\n");
       break;

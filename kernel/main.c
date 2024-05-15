@@ -4,6 +4,8 @@
 #include "riscv.h"
 #include "defs.h"
 
+
+// This is the entry point this main.c file is loaded into 0x8 by the instructions in entry.S.
 volatile static int started = 0;
 
 // start() jumps here in supervisor mode on all CPUs.
