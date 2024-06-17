@@ -1,7 +1,8 @@
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "kernel/fcntl.h"
-#ifdef LAB_PGTBL
+#define LAB_PGTBL 1
+#ifdef LAB_PGTBL 
 #include "kernel/riscv.h"
 #include "kernel/memlayout.h"
 #endif
@@ -146,6 +147,7 @@ int
 ugetpid(void)
 {
   struct usyscall *u = (struct usyscall *)USYSCALL;
+ 
   return u->pid;
 }
 #endif
