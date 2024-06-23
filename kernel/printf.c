@@ -132,3 +132,22 @@ printfinit(void)
   initlock(&pr.lock, "pr");
   pr.locking = 1;
 }
+
+void 
+backtrace(void)
+{
+ 
+  
+  uint64 fp = r_fp();
+  uint64 hi = PGROUNDUP(fp);
+  uint64 lo = PGROUNDDOWN(fp);
+  printf("backtrace:\n");
+  while(fp >= lo + 16 && fp < hi){
+    printf("%p\n", *(uint64*)(fp-8)); //the ra is at offset-8.
+    fp = *(uint64*)(fp-16); // previous frame pointer is at an offest of 16.
+    // to acess the element we need to convert fp into a pointer , its just a uint64. make it into a pointer and then dereference to get to the next adress.
+  }
+
+
+
+}

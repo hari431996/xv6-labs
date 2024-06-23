@@ -127,7 +127,7 @@ runcmd(struct cmd *cmd)
       runcmd(bcmd->cmd);
     break;
   }
-  exit(0);
+  exit(0); // send to the parent main waiting.
 }
 
 int
@@ -135,7 +135,7 @@ getcmd(char *buf, int nbuf)
 {
   fprintf(2, "$ ");
   memset(buf, 0, nbuf);
-  gets(buf, nbuf);
+  gets(buf, nbuf);  // get the input from the shell space. 
   if(buf[0] == 0) // EOF
     return -1;
   return 0;
@@ -164,7 +164,14 @@ main(void)
         fprintf(2, "cannot cd %s\n", buf+3);
       continue;
     }
+
+     // from here we move to the child by creating a fork.
+     // runcmd runs in fork().
+     
     if(fork1() == 0)
+
+      // the shell:main , waits here.
+
       runcmd(parsecmd(buf));
     wait(0);
   }

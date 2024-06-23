@@ -332,10 +332,24 @@ sfence_vma()
 }
 
 
+//  GCC compiler stores the frame pointer of the currently executing function in the register s0.
+static inline uint64
+r_fp()
+{
+  uint64 x;
+  asm volatile("mv %0, s0" : "=r" (x) );
+  return x;
+}
+
+
 #define PGSIZE 4096 // bytes per page
 #define PGSHIFT 12  // bits of offset within a page
 
+
+// rounds to bottom multiple of pgsize(4096) Ex. PGGROUNDUP(4097) --> 4096
 #define PGROUNDUP(sz)  (((sz)+PGSIZE-1) & ~(PGSIZE-1))
+// rounds to top positon multiple of pgsize(4096) Ex. PGGROUNDUP(4096) --> 8192.
+
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
 
 #define PTE_V (1L << 0) // valid
@@ -364,3 +378,5 @@ sfence_vma()
 
 typedef uint64 pte_t;
 typedef uint64 *pagetable_t; // 512 PTEs
+
+
