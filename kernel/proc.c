@@ -282,6 +282,8 @@ fork(void)
   }
 
   // Copy user memory from parent to child.
+  // for cow we need to modify this.
+
   if(uvmcopy(p->pagetable, np->pagetable, p->sz) < 0){
     freeproc(np);
     release(&np->lock);
@@ -341,8 +343,10 @@ exit(int status)
 {
   struct proc *p = myproc();
 
-  if(p == initproc)
+  if(p == initproc){
     panic("init exiting");
+    
+  }
 
   // Close all open files.
   for(int fd = 0; fd < NOFILE; fd++){

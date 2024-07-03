@@ -67,7 +67,56 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
-  } else {
+  }  else if((r_scause() == 15)) {
+      char * mem; // for page allocation.
+      uint flags;
+      uint64 pa;
+      pte_t *pte;
+     
+      
+      uint64 va = PGROUNDDOWN(r_stval()); // get the virtual address of the page where the page fault occured. 
+
+      if((mem = kalloc()) == 0){  //Allocate memory
+        p->killed = 1;
+        exit(-1);
+      }
+
+      
+
+      pte = walk(p->pagetable, va, 0); // get the 2nd level index from virtual memory indexing. 
+      pa = PTE2PA(*pte);   // pass the pte to get the physical adress. 
+      
+
+      // modify only if its write bit failure .
+    
+     
+
+      if (((*pte & PTE_W) == 0) &  (*pte & (PTE_R | PTE_U | PTE_V))){
+          memset(mem, 0, PGSIZE);
+          memmove(mem, (char * ) pa, PGSIZE);
+          flags = PTE_FLAGS(*pte);
+
+          flags |= PTE_W;
+
+          // do unmapping of the pte with the old pa address. 
+          // remove the previous mapping since we are making a new mapping.
+          uvmunmap(p->pagetable, va, 1 , 0);
+
+      
+        mappages(p->pagetable, va, PGSIZE, (uint64) mem, flags);
+
+      }
+
+     
+
+     
+
+      
+
+
+
+  } 
+  else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
     p->killed = 1;

@@ -14,6 +14,10 @@ void freerange(void *pa_start, void *pa_end);
 extern char end[]; // first address after kernel.
                    // defined by kernel.ld.
 
+
+// Intialise an array to keep track of page reference count.
+// put a lock since the array is shared can lead to inconsi
+
 struct run {
   struct run *next;
 };
