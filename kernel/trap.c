@@ -107,7 +107,9 @@ usertrap(void)
 
       }
 
-     
+      acquire(&pglock);
+      pgcount[pa/PGSIZE]--;
+      release(&pglock);
 
      
 

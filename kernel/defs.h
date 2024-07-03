@@ -8,7 +8,8 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
-
+extern int pgcount[];
+extern struct spinlock pglock;
 
 
 
@@ -66,6 +67,7 @@ void            ramdiskrw(struct buf*);
 void*           kalloc(void);
 void            kfree(void *);
 void            kinit(void);
+void            pglockinit(void);
 
 
 // log.c

@@ -16,7 +16,10 @@ extern char end[]; // first address after kernel.
 
 
 // Intialise an array to keep track of page reference count.
-// put a lock since the array is shared can lead to inconsi
+// put a lock since the array is shared can lead to race conditions.
+
+int pgcount[PHYSTOP/PGSIZE];
+struct spinlock pglock;
 
 struct run {
   struct run *next;
@@ -26,6 +29,10 @@ struct {
   struct spinlock lock;
   struct run *freelist;
 } kmem;
+
+void pglockinit(void){
+  initlock(&pglock, "pglock");
+}
 
 void
 kinit()
@@ -52,7 +59,13 @@ kfree(void *pa)
 {
   struct run *r;
 
-  if(((uint64)pa % PGSIZE) != 0 || (char*)pa < end || (uint64)pa >= PHYSTOP)
+   acquire(&pglock);
+    pgcount[((uint64)pa)/PGSIZE]--;
+  release(&pglock);
+
+  if (pgcount[((uint64)pa)/PGSIZE] <= 0){
+
+    if(((uint64)pa % PGSIZE) != 0 || (char*)pa < end || (uint64)pa >= PHYSTOP)
     panic("kfree");
 
   // Fill with junk to catch dangling refs.
@@ -65,6 +78,9 @@ kfree(void *pa)
   kmem.freelist = r;
   release(&kmem.lock);
 }
+}
+
+  
 
 // Allocate one 4096-byte page of physical memory.
 // Returns a pointer that the kernel can use.
@@ -82,5 +98,12 @@ kalloc(void)
 
   if(r)
     memset((char*)r, 5, PGSIZE); // fill with junk
+
+  acquire(&pglock);
+  pgcount[((uint64) r)/PGSIZE]++;
+  release(&pglock);
+
   return (void*)r;
+
+  
 }
